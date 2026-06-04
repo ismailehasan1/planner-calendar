@@ -1,0 +1,266 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+#cal-root{background:#1a1814;min-height:640px;padding:28px 32px 32px;font-family:'Georgia',serif;color:#e8e0d0;border-radius:12px}
+.top-label{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.top-label .icon{color:#c9853a;font-size:16px}
+.top-label span{font-family:Arial,sans-serif;font-size:11px;font-weight:700;letter-spacing:0.12em;color:#c9853a}
+.month-row{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:4px}
+.month-title{font-size:52px;font-weight:800;line-height:1;letter-spacing:-1px}
+.month-title .yr{color:#5a5040;font-weight:400;font-style:normal}
+.month-title .mo{color:#e8e0d0}
+.nav-area{display:flex;align-items:center;gap:6px;padding-bottom:6px}
+.nav-btn{background:transparent;border:1px solid #3a352c;border-radius:8px;color:#a09080;cursor:pointer;width:36px;height:36px;display:flex;align-items:center;justify-content:center;font-size:14px}
+.nav-btn:hover{background:#2a251e;color:#e8e0d0}
+.today-btn{background:#2a251e;border:1px solid #3a352c;border-radius:8px;color:#e8e0d0;cursor:pointer;padding:0 18px;height:36px;font-size:13px;font-family:Arial,sans-serif;font-weight:600}
+.today-btn:hover{background:#3a352c}
+.note-count{font-family:Arial,sans-serif;font-size:13px;color:#6a6050;margin-bottom:20px}
+.cal-wrap{background:#1e1c18;border:1px solid #2e2a22;border-radius:12px;overflow:hidden;margin-bottom:20px}
+.weekdays{display:grid;grid-template-columns:repeat(7,1fr);border-bottom:1px solid #2a2620}
+.wd{text-align:center;font-family:Arial,sans-serif;font-size:11px;font-weight:600;letter-spacing:0.08em;color:#4a4438;padding:12px 0}
+.day-grid{display:grid;grid-template-columns:repeat(7,1fr)}
+.day-cell{border-right:1px solid #252220;border-bottom:1px solid #252220;min-height:100px;padding:10px 10px 8px;cursor:pointer;position:relative;transition:background 0.12s}
+.day-cell:hover{background:#242018}
+.day-cell:nth-child(7n){border-right:none}
+.day-cell.other-month .dn{color:#3a3530;cursor:default}
+.day-cell.other-month{pointer-events:none}
+.day-cell-inner{display:flex;flex-direction:column;height:100%}
+.day-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.dn{font-family:Arial,sans-serif;font-size:14px;color:#7a7060;font-weight:400}
+.today-circle .dn{background:#c9853a;color:#1a1814;border-radius:50%;width:26px;height:26px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px}
+.dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.dot-personal{background:#e05c6a}
+.dot-priority{background:#d4824a}
+.dot-health{background:#3eb88a}
+.dot-work{background:#4a9cd4}
+.dot-social{background:#9b6ed4}
+.dot-other{background:#7a8090}
+.chips{display:flex;flex-direction:column;gap:4px}
+.chip{font-family:Arial,sans-serif;font-size:11px;padding:3px 8px;border-radius:20px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:500;border:1px solid transparent}
+.chip-personal{background:#3a1820;color:#e05c6a;border-color:#5a2030}
+.chip-priority{background:#3a2010;color:#d4824a;border-color:#5a3015}
+.chip-health{background:#0e2e22;color:#3eb88a;border-color:#1a4a34}
+.chip-work{background:#0e2030;color:#4a9cd4;border-color:#1a3a50}
+.chip-social{background:#22103a;color:#9b6ed4;border-color:#3a1858}
+.chip-other{background:#22201e;color:#8a8878;border-color:#3a3830}
+.more{font-family:Arial,sans-serif;font-size:10px;color:#4a4438;margin-top:2px}
+.color-legend{display:flex;align-items:center;justify-content:space-between;padding:0 4px}
+.legend-label{font-family:Arial,sans-serif;font-size:10px;font-weight:700;letter-spacing:0.1em;color:#4a4438}
+.legend-items{display:flex;align-items:center;gap:16px}
+.legend-item{display:flex;align-items:center;gap:6px;font-family:Arial,sans-serif;font-size:12px;color:#7a7060}
+.legend-dot{width:8px;height:8px;border-radius:50%}
+
+.modal-back{position:fixed;inset:0;background:rgba(0,0,0,0.65);display:flex;align-items:center;justify-content:center;z-index:200;padding:1rem}
+.modal{background:#1e1c18;border:1px solid #3a352c;border-radius:14px;width:100%;max-width:360px;overflow:hidden}
+.modal-head{padding:16px 20px 14px;border-bottom:1px solid #2a2620;display:flex;align-items:center;justify-content:space-between}
+.modal-datelabel{font-size:14px;font-weight:700;color:#e8e0d0;font-family:Arial,sans-serif}
+.modal-x{background:none;border:none;cursor:pointer;color:#6a6050;font-size:18px;display:flex;align-items:center}
+.modal-x:hover{color:#e8e0d0}
+.modal-body{padding:16px 20px}
+.notes-list{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
+.ni{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:8px;font-family:Arial,sans-serif;font-size:12px}
+.ni-text{flex:1}
+.ni-del{background:none;border:none;cursor:pointer;color:#4a4438;font-size:13px;display:flex;padding:2px}
+.ni-del:hover{color:#e05c6a}
+.empty-msg{font-family:Arial,sans-serif;font-size:12px;color:#4a4438;margin-bottom:14px}
+.add-area{display:flex;flex-direction:column;gap:10px}
+.add-area textarea{background:#141210;border:1px solid #2e2a22;border-radius:8px;color:#e8e0d0;font-family:Arial,sans-serif;font-size:12px;padding:9px 11px;resize:none;height:68px;outline:none;width:100%}
+.add-area textarea:focus{border-color:#4a4438}
+.swatches{display:flex;gap:7px}
+.sw{width:24px;height:24px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:transform 0.1s}
+.sw:hover{transform:scale(1.18)}
+.sw.sel{border-color:#e8e0d0}
+.sw-personal{background:#e05c6a}.sw-priority{background:#d4824a}.sw-health{background:#3eb88a}
+.sw-work{background:#4a9cd4}.sw-social{background:#9b6ed4}.sw-other{background:#7a8090}
+.add-row{display:flex;align-items:center;justify-content:space-between}
+.col-hint{font-family:Arial,sans-serif;font-size:10px;color:#4a4438}
+.add-btn{background:#c9853a;color:#1a1814;border:none;border-radius:8px;padding:7px 16px;font-size:12px;font-weight:700;cursor:pointer;font-family:Arial,sans-serif}
+.add-btn:hover{background:#d4924a}
+.add-btn:disabled{background:#3a2e20;color:#5a5040;cursor:not-allowed}
+</style>
+
+<div id="cal-root">
+  <div class="top-label"><i class="ti ti-calendar icon" aria-hidden="true"></i><span>PLANNER</span></div>
+  <div class="month-row">
+    <div class="month-title"><span class="mo" id="mo-name"></span> <span class="yr" id="yr-name"></span></div>
+    <div class="nav-area">
+      <button class="nav-btn" onclick="prevM()" aria-label="Prev"><i class="ti ti-chevron-left" aria-hidden="true"></i></button>
+      <button class="today-btn" onclick="goToday()">Today</button>
+      <button class="nav-btn" onclick="nextM()" aria-label="Next"><i class="ti ti-chevron-right" aria-hidden="true"></i></button>
+    </div>
+  </div>
+  <div class="note-count" id="note-count"></div>
+  <div class="cal-wrap">
+    <div class="weekdays" id="weekdays"></div>
+    <div class="day-grid" id="day-grid"></div>
+  </div>
+  <div class="color-legend">
+    <span class="legend-label">COLOR LABELS</span>
+    <div class="legend-items">
+      <div class="legend-item"><div class="legend-dot" style="background:#e05c6a"></div>Personal</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#d4824a"></div>Priority</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#3eb88a"></div>Health</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#4a9cd4"></div>Work</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#9b6ed4"></div>Social</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#7a8090"></div>Other</div>
+    </div>
+  </div>
+  <div id="modal-area"></div>
+</div>
+
+<script>
+const COLORS=[
+  {id:'personal',label:'Personal',chip:'chip-personal',dot:'dot-personal',sw:'sw-personal'},
+  {id:'priority',label:'Priority',chip:'chip-priority',dot:'dot-priority',sw:'sw-priority'},
+  {id:'health',label:'Health',chip:'chip-health',dot:'dot-health',sw:'sw-health'},
+  {id:'work',label:'Work',chip:'chip-work',dot:'dot-work',sw:'sw-work'},
+  {id:'social',label:'Social',chip:'chip-social',dot:'dot-social',sw:'sw-social'},
+  {id:'other',label:'Other',chip:'chip-other',dot:'dot-other',sw:'sw-other'},
+];
+const MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
+const WD=['SUN','MON','TUE','WED','THU','FRI','SAT'];
+
+function loadNotes(){try{return JSON.parse(localStorage.getItem('planner_notes')||'{}')}catch{return{}}}
+function saveNotes(n){localStorage.setItem('planner_notes',JSON.stringify(n))}
+function dkey(y,m,d){return`${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`}
+
+let notes=loadNotes();
+let now=new Date();
+let cur=new Date(now.getFullYear(),now.getMonth(),1);
+let modal=null;
+
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+
+function totalNotesThisMonth(){
+  const y=cur.getFullYear(),m=cur.getMonth();
+  let c=0;
+  Object.keys(notes).forEach(k=>{
+    const[ky,km]=k.split('-').map(Number);
+    if(ky===y&&km-1===m)c+=notes[k].length;
+  });
+  return c;
+}
+
+function renderCal(){
+  const today=new Date();
+  const y=cur.getFullYear(),m=cur.getMonth();
+  document.getElementById('mo-name').textContent=MONTHS[m];
+  document.getElementById('yr-name').textContent=y;
+  const cnt=totalNotesThisMonth();
+  document.getElementById('note-count').textContent=cnt===0?'No notes this month.':cnt===1?'1 note this month.':`${cnt} notes this month.`;
+
+  document.getElementById('weekdays').innerHTML=WD.map(d=>`<div class="wd">${d}</div>`).join('');
+
+  const firstDay=new Date(y,m,1).getDay();
+  const daysInMonth=new Date(y,m+1,0).getDate();
+  const daysInPrev=new Date(y,m,0).getDate();
+  const cells=[];
+  for(let i=0;i<firstDay;i++)cells.push({d:daysInPrev-firstDay+1+i,m:m===0?11:m-1,y:m===0?y-1:y,other:true});
+  for(let i=1;i<=daysInMonth;i++)cells.push({d:i,m,y,other:false});
+  const rem=42-cells.length;
+  for(let i=1;i<=rem;i++)cells.push({d:i,m:m===11?0:m+1,y:m===11?y+1:y,other:true});
+
+  const grid=document.getElementById('day-grid');
+  grid.innerHTML='';
+  cells.forEach(c=>{
+    const key=dkey(c.y,c.m,c.d);
+    const dayNotes=notes[key]||[];
+    const isToday=!c.other&&today.getFullYear()===c.y&&today.getMonth()===c.m&&today.getDate()===c.d;
+    const div=document.createElement('div');
+    div.className='day-cell'+(c.other?' other-month':'')+(isToday?' today-circle':'');
+
+    let dotHtml='';
+    if(dayNotes.length>0){
+      const col=COLORS.find(x=>x.id===dayNotes[0].color)||COLORS[5];
+      dotHtml=`<div class="dot ${col.dot}"></div>`;
+    }
+
+    let chipsHtml='<div class="chips">';
+    dayNotes.slice(0,2).forEach(n=>{
+      const col=COLORS.find(x=>x.id===n.color)||COLORS[5];
+      chipsHtml+=`<div class="chip ${col.chip}">${esc(n.text)}</div>`;
+    });
+    if(dayNotes.length>2)chipsHtml+=`<div class="more">+${dayNotes.length-2} more</div>`;
+    chipsHtml+='</div>';
+
+    div.innerHTML=`<div class="day-cell-inner">
+      <div class="day-top"><div class="dn">${c.d}</div>${dotHtml}</div>
+      ${chipsHtml}
+    </div>`;
+    if(!c.other)div.onclick=()=>openModal(key,c.d,c.m,c.y);
+    grid.appendChild(div);
+  });
+
+  renderModal();
+}
+
+function renderModal(){
+  const area=document.getElementById('modal-area');
+  if(!modal){area.innerHTML='';return;}
+  const key=modal.key;
+  const dayNotes=notes[key]||[];
+  const dateObj=new Date(modal.y,modal.m,modal.d);
+  const dl=dateObj.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});
+  const selColor=COLORS.find(x=>x.id===modal.color)||COLORS[0];
+
+  let noteList='';
+  if(dayNotes.length===0){
+    noteList='<div class="empty-msg">No notes yet. Add one below.</div>';
+  } else {
+    noteList='<div class="notes-list">'+dayNotes.map((n,i)=>{
+      const nc=COLORS.find(x=>x.id===n.color)||COLORS[5];
+      return`<div class="ni ${nc.chip}"><span class="ni-text">${esc(n.text)}</span><button class="ni-del" onclick="delNote('${key}',${i})" aria-label="Delete"><i class="ti ti-trash" aria-hidden="true"></i></button></div>`;
+    }).join('')+'</div>';
+  }
+
+  const swatches=COLORS.map(c=>`<button class="sw ${c.sw}${modal.color===c.id?' sel':''}" onclick="setCol('${c.id}')" title="${c.label}" aria-label="${c.label}"></button>`).join('');
+  const disabled=!modal.draft||!modal.draft.trim()?'disabled':'';
+
+  area.innerHTML=`<div class="modal-back" onclick="closeMB(event)">
+    <div class="modal" role="dialog">
+      <div class="modal-head">
+        <span class="modal-datelabel">${dl}</span>
+        <button class="modal-x" onclick="closeModal()" aria-label="Close"><i class="ti ti-x" aria-hidden="true"></i></button>
+      </div>
+      <div class="modal-body">
+        ${noteList}
+        <div class="add-area">
+          <textarea id="note-ta" placeholder="Write a note…">${esc(modal.draft||'')}</textarea>
+          <div class="add-row">
+            <div class="swatches">${swatches}</div>
+            <button class="add-btn" onclick="addNote('${key}')" ${disabled}>Add</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>`;
+
+  const ta=document.getElementById('note-ta');
+  if(ta){
+    ta.focus();ta.setSelectionRange(ta.value.length,ta.value.length);
+    ta.oninput=e=>{modal.draft=e.target.value;document.querySelector('.add-btn').disabled=!modal.draft.trim()};
+    ta.onkeydown=e=>{if((e.metaKey||e.ctrlKey)&&e.key==='Enter'){e.preventDefault();addNote(key)}};
+  }
+}
+
+function openModal(key,d,m,y){modal={key,d,m,y,color:'personal',draft:''};renderModal();}
+function closeModal(){modal=null;renderModal();}
+function closeMB(e){if(e.target.classList.contains('modal-back'))closeModal();}
+function setCol(c){if(modal){modal.color=c;renderModal();}}
+function addNote(key){
+  if(!modal||!modal.draft.trim())return;
+  if(!notes[key])notes[key]=[];
+  notes[key].push({text:modal.draft.trim(),color:modal.color});
+  saveNotes(notes);modal.draft='';renderCal();
+}
+function delNote(key,idx){
+  notes[key].splice(idx,1);
+  if(!notes[key].length)delete notes[key];
+  saveNotes(notes);renderCal();
+}
+function prevM(){cur=new Date(cur.getFullYear(),cur.getMonth()-1,1);renderCal();}
+function nextM(){cur=new Date(cur.getFullYear(),cur.getMonth()+1,1);renderCal();}
+function goToday(){const t=new Date();cur=new Date(t.getFullYear(),t.getMonth(),1);renderCal();}
+
+renderCal();
+</script>
